@@ -7,77 +7,92 @@ st.set_page_config(page_title="Networking Assistant", page_icon="🤝", layout="
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
     * {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
     }
     
     .main-header {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
         font-size: 2.5rem;
         font-weight: 700;
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        background: #000000;
         color: white;
         text-align: center;
         padding: 1.5rem;
-        border-radius: 15px;
+        border-radius: 0;
         margin-bottom: 2rem;
-        box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+        border-bottom: 3px solid #333333;
     }
     
     .suggestion-box {
-        font-family: 'Poppins', sans-serif;
-        font-size: 1.15rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 1.1rem;
         font-weight: 400;
         padding: 1.2rem;
-        border-radius: 12px;
-        border-left: 5px solid #1e3c72;
+        border-radius: 0;
+        border-left: 4px solid #000000;
         margin: 0.8rem 0;
-        background: linear-gradient(135deg, #f0f4ff 0%, #e8edf5 100%);
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        transition: transform 0.2s;
+        background: #ffffff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.2s;
     }
     
     .suggestion-box:hover {
-        transform: translateX(5px);
-        box-shadow: 0 4px 15px rgba(30, 60, 114, 0.2);
+        border-left-width: 8px;
+        background: #fafafa;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     
     .theme-box {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
         font-weight: 600;
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        background: #000000;
         color: white;
         padding: 0.8rem 1.2rem;
-        border-radius: 8px;
+        border-radius: 0;
         text-align: center;
-        box-shadow: 0 2px 8px rgba(30, 60, 114, 0.3);
+        border: 1px solid #000000;
     }
     
     .stButton>button {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
         font-weight: 600;
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        background: #000000;
         color: white;
-        border: none;
-        border-radius: 8px;
+        border: 2px solid #000000;
+        border-radius: 0;
         padding: 0.5rem 1rem;
         transition: all 0.3s;
     }
     
     .stButton>button:hover {
-        background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.4);
+        background: #ffffff;
+        color: #000000;
+        border: 2px solid #000000;
     }
     
     .section-title {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
         font-weight: 600;
-        color: #1e3c72;
+        color: #000000;
         font-size: 1.5rem;
         margin-top: 1rem;
+    }
+    
+    hr {
+        border: 1px solid #e0e0e0;
+    }
+    
+    .stTextInput>div>div>input {
+        border-radius: 0;
+        border: 2px solid #000000;
+    }
+    
+    .stTextArea>div>div>textarea {
+        border-radius: 0;
+        border: 2px solid #000000;
     }
     </style>
 """, unsafe_allow_html=True)
