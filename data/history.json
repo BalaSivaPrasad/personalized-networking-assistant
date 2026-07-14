@@ -149,5 +149,22 @@
       "What brings you to this event? I'm particularly interested in Technology."
     ],
     "timestamp": "2026-07-14T16:17:02.603340"
+  },
+  {
+    "event_description": "ai conference",
+    "interests": [
+      "ai uses"
+    ],
+    "themes": [
+      "Technology",
+      "Innovation",
+      "Networking"
+    ],
+    "suggestions": [
+      "Given your interest in ai uses, how do you see it connecting with Innovation?",
+      "I noticed this event focuses on Technology. What aspects of Technology interest you most?",
+      "What brings you to this event? I'm particularly interested in Technology."
+    ],
+    "timestamp": "2026-07-14T16:25:00.748912"
   }
 ]

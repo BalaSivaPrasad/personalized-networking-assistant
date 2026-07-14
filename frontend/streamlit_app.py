@@ -32,17 +32,22 @@ st.markdown("""
         font-weight: 400;
         padding: 1.2rem;
         border-radius: 0;
-        border-left: 4px solid #000000;
+        border-left: 4px solid #cc0000;
         margin: 0.8rem 0;
         background: #ffffff;
+        color: #cc0000;
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         transition: all 0.2s;
     }
     
     .suggestion-box:hover {
         border-left-width: 8px;
-        background: #fafafa;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        background: #fff5f5;
+        box-shadow: 0 2px 8px rgba(204,0,0,0.15);
+    }
+    
+    .suggestion-box strong {
+        color: #000000;
     }
     
     .theme-box {
@@ -57,12 +62,17 @@ st.markdown("""
     }
     
     .fact-box {
-        background: #f9f9f9;
+        background: #fff5f5;
         padding: 1.5rem;
-        border-left: 4px solid #000000;
+        border-left: 4px solid #cc0000;
         margin: 1rem 0;
         font-family: 'Inter', sans-serif;
         line-height: 1.8;
+        color: #cc0000;
+    }
+    
+    .fact-box strong {
+        color: #000000;
     }
     
     .stButton>button {
@@ -77,9 +87,9 @@ st.markdown("""
     }
     
     .stButton>button:hover {
-        background: #ffffff;
-        color: #000000;
-        border: 2px solid #000000;
+        background: #cc0000;
+        color: white;
+        border: 2px solid #cc0000;
     }
     
     hr {
@@ -94,6 +104,16 @@ st.markdown("""
     .stTextArea>div>div>textarea {
         border-radius: 0;
         border: 2px solid #000000;
+    }
+    
+    .stTextInput>div>div>input:focus {
+        border-color: #cc0000;
+        box-shadow: 0 0 0 1px #cc0000;
+    }
+    
+    .stTextArea>div>div>textarea:focus {
+        border-color: #cc0000;
+        box-shadow: 0 0 0 1px #cc0000;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -216,7 +236,7 @@ if history:
         st.markdown(f"**🎨 Themes:** {', '.join(entry.get('themes', []))}")
         st.markdown("**💬 Suggestions:**")
         for j, s in enumerate(entry.get('suggestions', [])):
-            st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;{j+1}. {s}")
+            st.markdown(f'<span style="color: #cc0000;">&nbsp;&nbsp;&nbsp;&nbsp;{j+1}. {s}</span>', unsafe_allow_html=True)
         st.markdown(f"*{entry.get('timestamp', '')[:10]}*")
         st.markdown("---")
 else:
@@ -228,7 +248,7 @@ feedback = load_feedback_history()
 if feedback:
     for entry in reversed(feedback[-10:]):
         icon = "👍" if entry.get('action') == 'like' else "👎"
-        st.markdown(f"{icon} {entry.get('suggestion', '')[:100]}...")
+        st.markdown(f"{icon} <span style='color: #cc0000;'>{entry.get('suggestion', '')[:100]}...</span>", unsafe_allow_html=True)
         st.caption(f"{entry.get('timestamp', '')[:10]}")
         st.write("---")
 else:
