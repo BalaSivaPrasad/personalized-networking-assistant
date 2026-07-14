@@ -5,8 +5,84 @@ BASE_URL = "http://127.0.0.1:8000/api"
 
 st.set_page_config(page_title="Networking Assistant", page_icon="🤝", layout="wide")
 
-st.markdown('<h1 style="text-align:center;color:#1f77b4;">🤝 Personalized Networking Assistant</h1>', unsafe_allow_html=True)
-st.markdown("---")
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    
+    * {
+        font-family: 'Poppins', sans-serif;
+    }
+    
+    .main-header {
+        font-family: 'Poppins', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+    }
+    
+    .suggestion-box {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.15rem;
+        font-weight: 400;
+        padding: 1.2rem;
+        border-radius: 12px;
+        border-left: 5px solid #1e3c72;
+        margin: 0.8rem 0;
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8edf5 100%);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+    }
+    
+    .suggestion-box:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(30, 60, 114, 0.2);
+    }
+    
+    .theme-box {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 0.8rem 1.2rem;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(30, 60, 114, 0.3);
+    }
+    
+    .stButton>button {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s;
+    }
+    
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 60, 114, 0.4);
+    }
+    
+    .section-title {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        color: #1e3c72;
+        font-size: 1.5rem;
+        margin-top: 1rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown('<h1 class="main-header">🤝 Personalized Networking Assistant</h1>', unsafe_allow_html=True)
 
 if 'suggestions' not in st.session_state:
     st.session_state.suggestions = None
@@ -80,12 +156,12 @@ if st.session_state.suggestions:
         st.subheader("🎨 Extracted Themes")
         cols = st.columns(len(st.session_state.themes))
         for i, theme in enumerate(st.session_state.themes):
-            cols[i].info(f"**{theme}**")
+            cols[i].markdown(f'<div class="theme-box">{theme}</div>', unsafe_allow_html=True)
     
     st.subheader("💬 Conversation Starters")
     for i, s in enumerate(st.session_state.suggestions):
         st.markdown(f"""
-        <div style="padding:1rem;border-radius:10px;border:1px solid #e0e0e0;margin:0.5rem 0;background-color:#f8f9fa;">
+        <div class="suggestion-box">
             <strong>Starter {i+1}:</strong> {s}
         </div>
         """, unsafe_allow_html=True)
@@ -111,31 +187,31 @@ if st.button("🔎 Verify Fact") and q:
             st.markdown(f"[📖 Read more on Wikipedia]({r['source_url']})")
 
 st.markdown("---")
-tab1, tab2 = st.tabs(["📚 Conversation History", "📊 Feedback History"])
+st.subheader("📚 Recent Conversations")
+history = load_history()
+if history:
+    for entry in reversed(history[-5:]):
+        st.markdown(f"**📝 Event:** {entry.get('event_description', 'N/A')[:80]}")
+        st.markdown(f"**🎨 Themes:** {', '.join(entry.get('themes', []))}")
+        st.markdown("**💬 Suggestions:**")
+        for j, s in enumerate(entry.get('suggestions', [])):
+            st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;{j+1}. {s}")
+        st.markdown(f"*{entry.get('timestamp', '')[:10]}*")
+        st.markdown("---")
+else:
+    st.info("No history yet.")
 
-with tab1:
-    history = load_history()
-    if history:
-        for entry in reversed(history[-5:]):
-            with st.expander(f"📝 {entry.get('event_description', 'Conversation')[:50]}..."):
-                st.write(f"**Event:** {entry.get('event_description')}")
-                st.write(f"**Interests:** {', '.join(entry.get('interests', []))}")
-                st.write("**Suggestions:**")
-                for j, s in enumerate(entry.get('suggestions', [])):
-                    st.write(f"{j+1}. {s}")
-    else:
-        st.info("No history yet.")
-
-with tab2:
-    feedback = load_feedback_history()
-    if feedback:
-        for entry in reversed(feedback[-10:]):
-            icon = "👍" if entry.get('action') == 'like' else "👎"
-            st.write(f"{icon} {entry.get('suggestion', '')[:100]}...")
-            st.caption(f"Rated: {entry.get('timestamp', 'Unknown')[:10]}")
-            st.write("---")
-    else:
-        st.info("No feedback yet.")
+st.markdown("---")
+st.subheader("📊 Your Feedback")
+feedback = load_feedback_history()
+if feedback:
+    for entry in reversed(feedback[-10:]):
+        icon = "👍" if entry.get('action') == 'like' else "👎"
+        st.markdown(f"{icon} {entry.get('suggestion', '')[:100]}...")
+        st.caption(f"{entry.get('timestamp', '')[:10]}")
+        st.write("---")
+else:
+    st.info("No feedback yet.")
 
 st.markdown("---")
 st.markdown("<p style='text-align:center;color:#666;'>Built with ❤️ using FastAPI & Streamlit</p>", unsafe_allow_html=True)
