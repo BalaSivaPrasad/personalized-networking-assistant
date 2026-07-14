@@ -8,3 +8,4 @@ pydantic==2.5.2
 pytest==7.4.3
 httpx==0.25.2
 pytest-cov==4.1.0
+echo duckduckgo_search >> requirements.txt

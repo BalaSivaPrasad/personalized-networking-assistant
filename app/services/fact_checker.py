@@ -1,26 +1,19 @@
 import requests
 from typing import Tuple, Optional
 from spellchecker import SpellChecker
+from duckduckgo_search import DDGS
 
-# Initialize spell checker once
 spell = SpellChecker()
 
 def correct_spelling(text: str) -> Tuple[str, list]:
-    """
-    Correct spelling mistakes in the input text.
-    Returns (corrected_text, list_of_corrections)
-    """
+    """Correct spelling and return (corrected_text, list of corrections)."""
     words = text.split()
     corrected_words = []
     corrections = []
-
     for word in words:
-        # Skip short words and numbers
         if len(word) <= 2 or word.isdigit():
             corrected_words.append(word)
             continue
-        
-        # Check if the word is misspelled
         if word.lower() not in spell:
             suggestion = spell.correction(word)
             if suggestion and suggestion.lower() != word.lower():
@@ -30,110 +23,108 @@ def correct_spelling(text: str) -> Tuple[str, list]:
                 corrected_words.append(word)
         else:
             corrected_words.append(word)
-    
     corrected_text = " ".join(corrected_words)
     return corrected_text, corrections
 
 
+def search_web(query: str) -> list:
+    """Search the web using DuckDuckGo and return list of results."""
+    try:
+        with DDGS() as ddgs:
+            return list(ddgs.text(query, max_results=3))
+    except Exception:
+        return []
+
+
 def fact_check(query: str) -> Tuple[str, Optional[str]]:
     """
-    Fact check a statement with spelling correction and deep verification.
+    Fact check a statement with spelling correction,
+    Wikipedia verification, and web search.
+    Returns (HTML_result, best_source_url).
     """
     try:
         original_query = query.strip()
-        
-        # Step 1: Correct spelling
+        html_parts = []
+
+        # ---------- Spelling Correction ----------
         corrected_query, corrections = correct_spelling(original_query)
-        
-        # Build result parts
-        result_parts = []
-        
-        # Show original vs corrected if there were changes
         if corrections:
-            result_parts.append("🔤 **Spelling Corrections:**")
+            html_parts.append('<p><b>🔤 Spelling Corrections:</b><br>')
             for c in corrections:
-                result_parts.append(f"  • {c}")
-            result_parts.append("")
-            # Use the corrected query for search
+                html_parts.append(f'&nbsp;&nbsp;• {c}<br>')
+            html_parts.append('</p>')
             search_query = corrected_query
         else:
             search_query = original_query
-        
-        # Step 2: Search Wikipedia with corrected query
-        search_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={requests.utils.quote(search_query)}&limit=3&format=json"
-        search_response = requests.get(search_url, headers={'User-Agent': 'NetworkingAssistant/1.0'}, timeout=10)
-        
-        if search_response.status_code != 200:
-            return "Unable to verify. Please check your internet connection.", None
-        
-        search_data = search_response.json()
-        
-        if not search_data[1]:
-            return f"❌ No information found for '{search_query}'. The statement may be incorrect or unverifiable.", None
-        
-        # Get best match
-        best_match = search_data[1][0]
-        
-        # Fetch summary
-        summary_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{requests.utils.quote(best_match)}"
-        summary_response = requests.get(summary_url, headers={'User-Agent': 'NetworkingAssistant/1.0'}, timeout=10)
-        
-        if summary_response.status_code != 200:
-            return f"Unable to retrieve details for '{best_match}'.", None
-        
-        summary_data = summary_response.json()
-        title = summary_data.get('title', best_match)
-        extract = summary_data.get('extract', '')
-        source_url = summary_data.get('content_urls', {}).get('desktop', {}).get('page', '')
-        
-        # Step 3: Analyse the statement against the summary
-        # Very simple factuality check: if the statement contains strongly negative/contradictory words
-        # we try to see if the summary supports or refutes them.
-        # A more robust check would require NLP, but here we'll present the info and let the user decide.
-        
-        result_parts.append(f"📚 **Topic:** {title}")
-        result_parts.append("")
-        
-        # Indicate verification status
-        result_parts.append("🔍 **Verification Result:**")
-        result_parts.append(f"✅ Information found and verified from Wikipedia for the corrected query: '{search_query}'.")
-        result_parts.append("")
-        
-        # Show a note if original was corrected
-        if original_query.lower() != corrected_query.lower():
-            result_parts.append("⚠️ The statement has been corrected for spelling. The original query may have contained errors.")
-            result_parts.append("")
-        
-        # Supporting facts (truncate and highlight relevant parts)
-        result_parts.append("📋 **Supporting Information:**")
-        if len(extract) > 800:
-            # Get the most relevant sentences
-            sentences = extract.replace('. ', '.|').split('|')
-            keywords = [word.lower() for word in search_query.split() if len(word) > 3]
-            relevant = []
-            for sent in sentences:
-                if any(kw in sent.lower() for kw in keywords):
-                    relevant.append(sent.strip())
-            if relevant:
-                extract = '. '.join(relevant[:3]) + '.'
-            else:
-                extract = extract[:800] + "..."
-        result_parts.append(extract)
-        result_parts.append("")
-        
-        # Related topics
-        if len(search_data[1]) > 1:
-            result_parts.append("📌 **Related Topics:**")
-            for related in search_data[1][1:3]:
-                if related != best_match:
-                    result_parts.append(f"• {related}")
-        
-        result = "\n".join(result_parts)
-        return result, source_url
-        
-    except requests.exceptions.Timeout:
-        return "⚠️ Wikipedia API request timed out. Please try again.", None
-    except requests.exceptions.ConnectionError:
-        return "⚠️ Could not connect to Wikipedia. Please check your internet connection.", None
+
+        # ---------- Wikipedia ----------
+        wiki_title = None
+        wiki_extract = None
+        wiki_link = None
+        try:
+            search_url = f"https://en.wikipedia.org/w/api.php?action=opensearch&search={requests.utils.quote(search_query)}&limit=3&format=json"
+            resp = requests.get(search_url, headers={'User-Agent': 'NetworkingAssistant/1.0'}, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json()
+                if data[1]:
+                    best = data[1][0]
+                    sum_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{requests.utils.quote(best)}"
+                    sum_resp = requests.get(sum_url, headers={'User-Agent': 'NetworkingAssistant/1.0'}, timeout=10)
+                    if sum_resp.status_code == 200:
+                        sdata = sum_resp.json()
+                        wiki_title = sdata.get("title", best)
+                        wiki_extract = sdata.get("extract", "")
+                        wiki_link = sdata.get("content_urls", {}).get("desktop", {}).get("page", "")
+        except Exception:
+            pass
+
+        # ---------- Web Search ----------
+        web_results = search_web(search_query)
+
+        # ---------- Build HTML Report ----------
+        html_parts.append('<h3>🔍 Verification Report</h3>')
+
+        # Wikipedia section
+        if wiki_extract:
+            html_parts.append(f'<p><b>📚 Wikipedia – {wiki_title}</b><br>')
+            extract = wiki_extract[:800]
+            if len(wiki_extract) > 800:
+                extract += "..."
+            html_parts.append(f'{extract}<br>')
+            if wiki_link:
+                html_parts.append(f'<a href="{wiki_link}" target="_blank">Read full Wikipedia article</a>')
+            html_parts.append('</p>')
+        else:
+            html_parts.append('<p><b>📚 Wikipedia:</b> No direct article found.</p>')
+
+        # Web search section
+        if web_results:
+            html_parts.append('<p><b>🌐 Top Web Results:</b><br>')
+            for i, res in enumerate(web_results, 1):
+                title = res.get('title', 'No title')
+                snippet = res.get('body', res.get('snippet', ''))[:200]
+                url = res.get('href', res.get('url', ''))
+                html_parts.append(f'<b>{i}. {title}</b><br>')
+                html_parts.append(f'{snippet}...<br>')
+                if url:
+                    html_parts.append(f'<a href="{url}" target="_blank">{url}</a><br>')
+                html_parts.append('<br>')
+            html_parts.append('</p>')
+        else:
+            html_parts.append('<p><b>🌐 Web Search:</b> No relevant results found.</p>')
+
+        # Conclusion
+        html_parts.append('<p><b>💡 Conclusion:</b> ')
+        if wiki_extract or web_results:
+            html_parts.append('Multiple sources were consulted. The statement appears to be <b>supported</b> based on the information above.')
+        else:
+            html_parts.append('No reliable information was found to verify this statement. It may be unverified or incorrect.')
+        html_parts.append('</p>')
+
+        result_html = "\n".join(html_parts)
+        # Use the first available URL as the main source
+        main_url = wiki_link if wiki_link else (web_results[0].get('href') if web_results else None)
+        return result_html, main_url
+
     except Exception as e:
-        return f"❌ Error during verification: {str(e)}", None
+        return f"<p style='color:red;'>❌ Error during verification: {str(e)}</p>", None

@@ -71,7 +71,12 @@ st.markdown("""
         color: #cc0000;
     }
     
-    .fact-box strong {
+    .fact-box a {
+        color: #0000ee;
+        text-decoration: underline;
+    }
+    
+    .fact-box strong, .fact-box b {
         color: #000000;
     }
     
@@ -212,18 +217,20 @@ if st.session_state.suggestions:
                 st.info("Noted!")
         st.write("")
 
+# ---------- Fact Check Section (Updated) ----------
 st.markdown("---")
 st.subheader("🔍 Fact Check & Verify")
-st.caption("Enter any statement to verify facts and get supporting information from Wikipedia")
+st.caption("Enter any statement to verify facts and get supporting information from Wikipedia and the web")
 q = st.text_input("Enter a statement to verify", placeholder="e.g., Is Python a programming language?")
 if st.button("🔎 Verify Statement") and q:
     with st.spinner("🔍 Researching and verifying..."):
         r = fact_check_query(q)
         st.markdown("---")
         if r.get('result'):
+            # Display the HTML result inside the red fact-box
             st.markdown(f'<div class="fact-box">{r["result"]}</div>', unsafe_allow_html=True)
             if r.get('source_url'):
-                st.markdown(f"📖 [Read full article on Wikipedia]({r['source_url']})")
+                st.markdown(f"📖 [Read full article]({r['source_url']})")
         else:
             st.warning("No results found for this statement.")
 
