@@ -56,6 +56,15 @@ st.markdown("""
         border: 1px solid #000000;
     }
     
+    .fact-box {
+        background: #f9f9f9;
+        padding: 1.5rem;
+        border-left: 4px solid #000000;
+        margin: 1rem 0;
+        font-family: 'Inter', sans-serif;
+        line-height: 1.8;
+    }
+    
     .stButton>button {
         font-family: 'Inter', sans-serif;
         font-weight: 600;
@@ -71,14 +80,6 @@ st.markdown("""
         background: #ffffff;
         color: #000000;
         border: 2px solid #000000;
-    }
-    
-    .section-title {
-        font-family: 'Inter', sans-serif;
-        font-weight: 600;
-        color: #000000;
-        font-size: 1.5rem;
-        margin-top: 1rem;
     }
     
     hr {
@@ -192,14 +193,19 @@ if st.session_state.suggestions:
         st.write("")
 
 st.markdown("---")
-st.subheader("🔍 Fact Check with Wikipedia")
-q = st.text_input("Enter a topic to verify", placeholder="e.g., Machine Learning")
-if st.button("🔎 Verify Fact") and q:
-    with st.spinner("Checking Wikipedia..."):
+st.subheader("🔍 Fact Check & Verify")
+st.caption("Enter any statement to verify facts and get supporting information from Wikipedia")
+q = st.text_input("Enter a statement to verify", placeholder="e.g., Is Python a programming language?")
+if st.button("🔎 Verify Statement") and q:
+    with st.spinner("🔍 Researching and verifying..."):
         r = fact_check_query(q)
-        st.success(r.get('result', 'No result'))
-        if r.get('source_url'):
-            st.markdown(f"[📖 Read more on Wikipedia]({r['source_url']})")
+        st.markdown("---")
+        if r.get('result'):
+            st.markdown(f'<div class="fact-box">{r["result"]}</div>', unsafe_allow_html=True)
+            if r.get('source_url'):
+                st.markdown(f"📖 [Read full article on Wikipedia]({r['source_url']})")
+        else:
+            st.warning("No results found for this statement.")
 
 st.markdown("---")
 st.subheader("📚 Recent Conversations")
