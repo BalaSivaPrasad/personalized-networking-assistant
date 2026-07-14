@@ -1,0 +1,1 @@
+venv/\n__pycache__/\n*.pyc\n.env\n*.egg-info/\ndist/\nbuild/\n.pytest_cache/\n.coverage\nhtmlcov/\ndata/*.json
